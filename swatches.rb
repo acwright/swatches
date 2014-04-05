@@ -23,10 +23,6 @@ before '*' do
   content_type :json
 end
 
-get '/' do
-  redirect to('/swatches')
-end
-
 # Index
 get '/swatches/?' do
   Swatch.all.to_json
@@ -44,6 +40,16 @@ end
 # Create
 post '/swatches/?' do
   Swatch.create(JSON.parse(request.body.read))
+  status 201
+end
+
+# Update
+put '/swatches/:id/?' do
+  begin
+    Swatch.find(params[:id]).update_attributes(JSON.parse(request.body.read))
+  rescue
+    status 404
+  end
 end
 
 # Destroy
