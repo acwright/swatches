@@ -1,44 +1,56 @@
-require File.dirname(__FILE__) + '/bootstrap.rb'
+require 'rubygems'
+require 'bundler'
 
-class Swatches < Sinatra::Base
+ENV['RACK_ENV'] ||= 'development'
+
+Bundler.require(:default)
+
+class Swatch
+  include Mongoid::Document
+  include Mongoid::Timestamps
   
-  configure do
-    set :root,    File.dirname(__FILE__)
+  field :color,  type: String
+  field :name,   type: String
+end
+
+configure do
+  set :root,    File.dirname(__FILE__)
+  
+  Mongoid.load!(File.dirname(__FILE__) + '/mongoid.yml')
+end
+
+before '*' do
+  content_type :json
+end
+
+get '/' do
+  redirect to('/swatches')
+end
+
+# Index
+get '/swatches/?' do
+  Swatch.all.to_json
+end
+
+# Find
+get '/swatches/:id/?' do
+  begin
+    Swatch.find(params[:id]).to_json
+  rescue
+    status 404
   end
-  
-  before '*' do
-    content_type :json
-  end
-  
-  get '/' do
-    redirect to('/swatches')
-  end
-  
-  # Index
-  get '/swatches/?' do
-    Swatch.all.to_json
-  end
-  
-  # Find
-  get '/swatches/:id/?' do
-    begin
-      Swatch.find(params[:id]).to_json
-    rescue
-      status 404
-    end
-  end
-  
-  # Create
-  post '/swatches/:name/:color/?' do
-    Swatch.create(:name => params[:name], :color => params[:color])
-  end
-  
-  # Destroy
-  delete '/swatches/:id' do
-    begin
-      Swatch.find(params[:id]).destroy
-    rescue
-      status 404
-    end
+end
+
+# Create
+post '/swatches/?' do
+  Swatch.create(JSON.parse(request.body.read))
+end
+
+# Destroy
+delete '/swatches/:id' do
+  begin
+    Swatch.find(params[:id]).destroy
+  rescue
+    status 404
   end
 end
