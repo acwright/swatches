@@ -1,0 +1,14 @@
+production:
+  sessions:
+    default:
+      uri: <%= ENV['MONGOLAB_URI'] %>
+  options:
+    include_root_in_json: true
+development:
+  sessions:
+    default:
+      hosts:
+        - localhost:27017
+      database: swatches
+  options:
+    include_root_in_json: true
